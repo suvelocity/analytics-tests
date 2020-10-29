@@ -1,7 +1,9 @@
 import { mockData } from "./mock_data";
 import request from "supertest";
-import { Event as event } from "./event"
-const app = require('../_cloned-app/server/backend/app');
+import { Event as event } from "../analytics-challenge/client/src/models/event"
+const app = require('../analytics-challenge/server/backend/app');
+// import { Event as event } from "../_cloned-app/client/src/models/event"
+// const app = require('../_cloned-app/server/backend/app');
 
 const isEvent = (event: any ): event is event => {
   if(
