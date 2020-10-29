@@ -1,5 +1,3 @@
-import { TDatabase } from "../database";
-
 
 const mockData: any =  {
   "events": [
