@@ -58,7 +58,7 @@ describe("main test", () => {
     const { body: sessionsByDays } = await request(app).get("/events/by-days/0").expect(200)
 
     expect(sessionsByDays.length).toBe(7)
-    expect(sessionsByDays.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(48)
+    expect(sessionsByDays.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(43)
     expect(sessionsByDays[0].count).toBe(7);
 
     const { body: sessionsByDays2 } = await request(app).get("/events/by-days/7").expect(200)
@@ -66,8 +66,8 @@ describe("main test", () => {
     expect(sessionsByDays2.length).toBe(7)
     expect(sessionsByDays2.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(52)
     expect(sessionsByDays2[0].count).toBe(7);
-    expect(sessionsByDays2[1].count).toBe(8);
-    expect(sessionsByDays2[6].count).toBe(7);
+    expect(sessionsByDays2[1].count).toBe(7);
+    expect(sessionsByDays2[6].count).toBe(8);
   });
 
   it("can get unique sessions count by hour", async () => {
@@ -81,16 +81,15 @@ describe("main test", () => {
     expect(sessionsByHours2.length).toBe(24)
     expect(sessionsByHours2.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(8)
   });
-  
+
   it("can get data for os chart", async () => {
     const { body: eventsToday } = await request(app).get(`/events/chart/os/today`).expect(200);
     expect(eventsToday.length).toBe(4);
     expect(eventsToday[0].os).toBe(mockData.events[0].os)
-    expect(eventsToday[2].os).toBe(mockData.events[2].os)
-    
+
     const { body: eventsWeek } = await request(app).get(`/events/chart/os/week`).expect(200);
     expect(eventsWeek.length).toBe(45);
-    
+
     const { body: eventsAll } = await request(app).get(`/events/chart/os/all`).expect(200);
     expect(eventsAll.length).toBe(251);
     
@@ -108,29 +107,28 @@ describe("main test", () => {
     const { body: eventsAll } = await request(app).get(`/events/chart/pageview/all`).expect(200);
     expect(eventsAll.length).toBe(251);
   })
-  
+
   it("can get data for geolocation chart", async () => {
     const { body: eventsToday } = await request(app).get(`/events/chart/geolocation/today`).expect(200);
     expect(eventsToday.length).toBe(4);
     expect(eventsToday[0].geolocation).toStrictEqual(mockData.events[0].geolocation)
-    expect(eventsToday[2].geolocation).toStrictEqual(mockData.events[2].geolocation)
-    
+
     const { body: eventsWeek } = await request(app).get(`/events/chart/geolocation/week`).expect(200);
     expect(eventsWeek.length).toBe(45);
-    
+
     const { body: eventsAll } = await request(app).get(`/events/chart/geolocation/all`).expect(200);
     expect(eventsAll.length).toBe(251);
   })
-  
+
   it("retention cohort", async () => {
-    
+  
     const { body: retentionData } = await request(app).get("/events/retention").expect(200);
     expect(retentionData.length).toBe(6);
 
     expect(retentionData[0].weeklyRetention.slice(0,3)).toEqual([100, 27, 18]);
     expect(retentionData[1].weeklyRetention.slice(0,2)).toEqual([100, 57]);
     expect(retentionData[2].weeklyRetention[0]).toBe(100);
-    
+
     expect(retentionData[1].weeklyRetention[4]).toBe(0);
 
   });
@@ -160,7 +158,7 @@ describe("main test", () => {
     expect(events.events[0].session_id).toMatch(/100/i)
     expect(events.events[1].session_id).toMatch(/100/i)
   })
-  
+
   it("can sort events by date", async () => {
     const { body: events}  = await request(app).get("/events/all-filtered")
     .query({
