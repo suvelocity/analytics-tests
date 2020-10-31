@@ -1,11 +1,11 @@
 import { mockData } from "./mock_data";
 import request from "supertest";
-import app  from '../analytics-challenge/server/backend/app';
-import { Event as event } from "../analytics-challenge/client/src/models/event"
-import db from '../analytics-challenge/server/backend/database'
-// import app  from '../_cloned-app/server/backend/app';
-// import { Event as event } from "../_cloned-app/client/src/models/event"
-// import db from '../_cloned-app/server/backend/database'
+// import app  from '../analytics-challenge/server/backend/app';
+// import { Event as event } from "../analytics-challenge/client/src/models/event"
+// import db from '../analytics-challenge/server/backend/database'
+import app  from '../_cloned-app/server/backend/app';
+import { Event as event } from "../_cloned-app/client/src/models/event"
+import db from '../_cloned-app/server/backend/database'
 
 const isEvent = (event: any ): event is event => {
   if(
