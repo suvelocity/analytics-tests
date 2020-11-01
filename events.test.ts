@@ -1,32 +1,34 @@
-import { mockData } from "./mock_data";
+import app  from '../analytics-challenge/server/backend/app';
+import { Event as event } from "../analytics-challenge/client/src/models/event"
+import db from '../analytics-challenge/server/backend/database'
+// import app  from '../_cloned-app/server/backend/app';
+// import { Event as event } from "../_cloned-app/client/src/models/event"
+// import db from '../_cloned-app/server/backend/database'
+import mockData from "./mock_data";
 import request from "supertest";
-// import app  from '../analytics-challenge/server/backend/app';
-// import { Event as event } from "../analytics-challenge/client/src/models/event"
-// import db from '../analytics-challenge/server/backend/database'
-import app  from '../_cloned-app/server/backend/app';
-import { Event as event } from "../_cloned-app/client/src/models/event"
-import db from '../_cloned-app/server/backend/database'
+import {OneHour, OneDay, OneWeek} from './timeFrames'
 
-const isEvent = (event: any ): event is event => {
-  if(
-   '_id' in event&&
-   'session_id' in event&&
-   'name' in event&&
-   'url' in event&&
-   'distinct_user_id' in event&&
-   'date' in event&&
-   'os' in event&&
-   'browser' in event&&
-   'geolocation' in event
-   ){
-     return true
-   }else{
-     return false
-   }
+
+ const isEvent = (event : any ): event is event => {
+   if(
+    '_id' in event&&
+    'session_id' in event&&
+    'name' in event&&
+    'url' in event&&
+    'distinct_user_id' in event&&
+    'date' in event&&
+    'os' in event&&
+    'browser' in event&&
+    'geolocation' in event
+    ){
+      return true
+    }else{
+      return false
+    }
 }
 
 const isEventArray = (events: any[]): events is event[] => {
- return events.every(eve=>isEvent(eve))
+  return events.every(eve=>isEvent(eve))
 }
 
 describe("main test", () => {
@@ -38,7 +40,7 @@ describe("main test", () => {
 
   it("can get all events", async () => {
     const { body: allEvents } = await request(app).get("/events/all").expect(200);
-    expect(allEvents.length).toBe(250);
+    expect(allEvents.length).toBe(300);
   });
 
   it("getting all events from the server must return array of event types", async () => {
@@ -46,55 +48,54 @@ describe("main test", () => {
     expect(isEventArray(allEvents)).toBe(true);
   });
 
-  it("can post new event", async () => {
-    await request(app).post("/events").send(mockData.events[0]).expect(200);
-    const { body: allEvents2 } = await request(app).get("/events/all").expect(200);
-    expect(allEvents2.length).toBe(251);
-    expect(allEvents2[250].date).toBe(mockData.events[0].date);
-    expect(allEvents2[250].os).toBe(mockData.events[0].os);
-  });
-
   it("can get unique sessions count by day", async () => {
     const { body: sessionsByDays } = await request(app).get("/events/by-days/0").expect(200)
 
     expect(sessionsByDays.length).toBe(7)
-    expect(sessionsByDays.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(47)
-    expect(sessionsByDays[0].count).toBe(8);
+    expect(sessionsByDays.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(145
+      )
+    expect(sessionsByDays[0].count).toBe(19);
 
     const { body: sessionsByDays2 } = await request(app).get("/events/by-days/7").expect(200)
 
     expect(sessionsByDays2.length).toBe(7)
-    expect(sessionsByDays2.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(56)
-    expect(sessionsByDays2[0].count).toBe(8);
-    expect(sessionsByDays2[1].count).toBe(8);
-    expect(sessionsByDays2[6].count).toBe(8);
+    expect(sessionsByDays2.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(78)
+    expect(sessionsByDays2[0].count).toBe(11);
+    expect(sessionsByDays2[1].count).toBe(9);
+    expect(sessionsByDays2[6].count).toBe(14);
   });
 
   it("can get unique sessions count by hour", async () => {
     const { body: sessionsByHours } = await request(app).get("/events/by-hours/0").expect(200)
 
     expect(sessionsByHours.length).toBe(24)
-    expect(sessionsByHours.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(2)
+    expect(sessionsByHours.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(7)
 
     const { body: sessionsByHours2 } = await request(app).get("/events/by-hours/2").expect(200)
 
     expect(sessionsByHours2.length).toBe(24)
-    expect(sessionsByHours2.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(8)
+    expect(sessionsByHours2.reduce((sum: number, day: {date: string; count: number}) => sum += day.count, 0)).toBe(25)
   });
 
   it("retention cohort", async () => {
-  
-    const { body: retentionData } = await request(app).get("/events/retention").expect(200);
+    const today = new Date (new Date().toDateString()).getTime()+6*OneHour
+    const dayZero = today-5*OneWeek
+
+    const { body: retentionData } = await request(app).get(
+      `/events/retention?dayZero=${dayZero}`
+    ).expect(200);
+    
+    console.log(retentionData)
+
     expect(retentionData.length).toBe(6);
+    
+    expect(retentionData[0].weeklyRetention).toEqual([ 100, 40, 60, 90, 80, 0 ]);
+    expect(retentionData[1].weeklyRetention).toEqual([ 100, 90, 60,100,0 ]);
+    expect(retentionData[2].weeklyRetention).toEqual([ 100, 100, 82, 9 ]);
+    expect(retentionData[4].newUsers).toBe(9);
 
-    expect(retentionData[0].weeklyRetention.slice(0,4)).toEqual([100, 15, 23, 15]);
-    expect(retentionData[1].weeklyRetention.slice(0,3)).toEqual([100, 54, 23]);
-    expect(retentionData[2].weeklyRetention.slice(0,2)).toEqual([100, 62]);
-
-    expect(retentionData[1].weeklyRetention[4]).toBe(0);
 
   });
-
   it("can filter events by browser", async () => {
 
     const { body: events}  = await request(app).get("/events/all-filtered")
@@ -139,10 +140,12 @@ describe("main test", () => {
     expect(events2.events[1].date).toBeGreaterThan(events2.events[0].date)
   })
 
+  it("can post new event", async () => {
+    await request(app).post("/events").send(mockData.events[0]).expect(200);
+    const { body: allEvents2 } = await request(app).get("/events/all").expect(200);
+    expect(allEvents2.length).toBe(301);
+    expect(allEvents2[300].date).toBe(mockData.events[0].date);
+    expect(allEvents2[300].os).toBe(mockData.events[0].os);
+  });
+
 })
-  // it("can get time of each URL for 'time on URL chart'", async () => {
-  //   const { body: time } = await request(app).get("/chart/timeonurl/allusers").expect(200)
-  //   const { body: timeIHours } = await request(app).get("/chart/timeonurl/inhours").expect(200)
-  //   expect(time.length).toBe(7)
-  //   expect(countBy((day) => day.count, time)).toBe(47)
-  // });
