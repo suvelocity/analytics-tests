@@ -78,7 +78,7 @@ describe("main test", () => {
   });
 
   it("retention cohort", async () => {
-    const today = new Date (new Date().toDateString()).getTime()+6*OneHour
+    const today = new Date (new Date(new Date().toUTCString()).toDateString()).getTime()+6*OneHour
     const dayZero = today-5*OneWeek
 
     const { body: retentionData } = await request(app).get(
