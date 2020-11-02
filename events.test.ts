@@ -145,7 +145,10 @@ describe("main test", () => {
   })
 
   it("can post new event", async () => {
-    await request(app).post("/events").send(mockData.events[0]).expect(200);
+    await request(app).post("/events").send(mockData.events[0])
+    .expect(({status})=>{
+      if(status!==200 && status !== 201) throw new Error(`Expected Status to be '200 OK' Or '201 Created', instead received ${status}`)
+    });;
     const { body: allEvents2 } = await request(app).get("/events/all").expect(200);
     expect(allEvents2.length).toBe(301);
     expect(allEvents2[300].date).toBe(mockData.events[0].date);
