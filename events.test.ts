@@ -80,7 +80,7 @@ describe("main test", () => {
   it("retention cohort", async () => {
     const today = new Date (new Date(new Date().toUTCString()).toDateString()).getTime()+6*OneHour
     const dayZero = today-5*OneWeek
-
+    console.log( new Date(today))
     const { body: retentionData } = await request(app).get(
       `/events/retention?dayZero=${dayZero}`
     ).expect(200);
