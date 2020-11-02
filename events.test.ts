@@ -1,6 +1,6 @@
-// import app  from '../analytics-challenge/server/backend/app';
-// import { Event as event } from "../analytics-challenge/client/src/models/event"
-// import db from '../analytics-challenge/server/backend/database'
+// import app  from '../analytics-challenge-submission/server/backend/app';
+// import { Event as event } from "../analytics-challenge-submission/client/src/models/event"
+// import db from '../analytics-challenge-submission/server/backend/database'
 import app  from '../_cloned-app/server/backend/app';
 import { Event as event } from "../_cloned-app/client/src/models/event"
 import db from '../_cloned-app/server/backend/database'
@@ -78,9 +78,9 @@ describe("main test", () => {
   });
 
   it("retention cohort", async () => {
-    const today = new Date (new Date(new Date().toUTCString()).toDateString()).getTime()+6*OneHour
+    const today = new Date (new Date().toDateString()).getTime()+6*OneHour
     const dayZero = today-5*OneWeek
-    console.log( new Date(today))
+
     const { body: retentionData } = await request(app).get(
       `/events/retention?dayZero=${dayZero}`
     ).expect(200);
@@ -91,9 +91,9 @@ describe("main test", () => {
     
     expect(retentionData[0].newUsers).toBe(10);
     expect(retentionData[0].weeklyRetention).toEqual([ 100, 30, 60, 90, 80, 0 ]);
-    expect(retentionData[1].newUsers).toBe(10);
+    expect(retentionData[1].newUsers).toBe(11);
     expect(retentionData[1].weeklyRetention).toEqual([ 100, 90, 60,100,0 ]);
-    expect(retentionData[2].newUsers).toBe(11);
+    expect(retentionData[2].newUsers).toBe(10);
     expect(retentionData[2].weeklyRetention).toEqual([ 100, 100, 82, 9 ]);
     expect(retentionData[4].newUsers).toBe(9);
     expect(retentionData[4].weeklyRetention).toEqual([ 100, 44 ]);
